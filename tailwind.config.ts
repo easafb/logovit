@@ -1,5 +1,5 @@
 // tailwind.config.ts
-import type { Config as TailwindConfig } from "tailwindcss/types/config";
+import type { Config as TailwindConfig } from "tailwindcss";
 import animate from "tailwindcss-animate";
 
 /**
