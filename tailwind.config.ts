@@ -1,9 +1,17 @@
 // tailwind.config.ts
-import type { Config } from "tailwindcss/types/config";
+import type { Config as TailwindConfig } from "tailwindcss/types/config";
 import animate from "tailwindcss-animate";
 
-const config: Config = {
-  darkMode: "class",
+/**
+ * Tailwind v4 tiplerinde top-level `safelist` bazen tanımlı değil.
+ * Burada kendi genişletilmiş tipimizi tanımlıyoruz, export'ta tekrar Tailwind tipine çeviriyoruz.
+ */
+type WithSafelist = TailwindConfig & {
+  safelist?: Array<string | { pattern: RegExp; variants?: string[] }>;
+};
+
+const config: WithSafelist = {
+  darkMode: "class", // veya ["class", ".dark"]
   content: [
     "./src/app/**/*.{ts,tsx}",
     "./src/pages/**/*.{ts,tsx}",
@@ -11,6 +19,7 @@ const config: Config = {
     "./src/hooks/**/*.{ts,tsx}",
     "./src/lib/**/*.{ts,tsx}",
   ],
+
   theme: {
     container: {
       center: true,
@@ -18,6 +27,7 @@ const config: Config = {
       screens: { "2xl": "1400px" },
     },
     extend: {
+      // Renkleri globals.css’teki CSS değişkenlerinden okuyoruz
       colors: {
         primary: "var(--orange-base)",
         "primary-hover": "var(--orange-hover)",
@@ -41,7 +51,26 @@ const config: Config = {
       },
     },
   },
+
   plugins: [animate],
+
+  /**
+   * Safelist: production’da JIT tarafından üretilmeyen ama bizim global CSS’te
+   * (veya runtime’ta) ihtiyaç duyabileceğimiz sınıfları korur.
+   * Basit string listesi veya RegExp pattern’leri kullanabilirsiniz.
+   */
+  safelist: [
+    "btn-outline",
+    "btn-orange",
+    "input-base",
+    "badge-contrast",
+    "ap-table",
+    // Örnek desen: tüm text- ve bg-primary varyantlarını koru
+    { pattern: /^text-(primary|foreground|muted)$/ },
+    { pattern: /^bg-(card|soft|page)$/ },
+    { pattern: /^border-(line)$/ },
+  ],
 };
 
-export default config;
+// Export'u TailwindConfig tipine çeviriyoruz ki TS şikayet etmesin.
+export default config as unknown as TailwindConfig;
