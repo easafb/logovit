@@ -1,9 +1,9 @@
 // tailwind.config.ts
-import type { Config } from "tailwindcss";
-import animate from "tailwindcss-animate";   // <-- EKLENDİ
+import type { Config } from "tailwindcss/types/config";
+import animate from "tailwindcss-animate";
 
 const config: Config = {
-  darkMode: 'class',
+  darkMode: "class",
   content: [
     "./src/app/**/*.{ts,tsx}",
     "./src/pages/**/*.{ts,tsx}",
@@ -41,8 +41,7 @@ const config: Config = {
       },
     },
   },
-  plugins: [animate],    // <-- BURADA
-  safelist: ["btn-outline", "btn-orange", "input-base", "badge-contrast", "ap-table"],
+  plugins: [animate],
 };
 
 export default config;
