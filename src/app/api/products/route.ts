@@ -1,41 +1,40 @@
 import { NextResponse } from "next/server";
-import { readProducts, writeProducts, type Product } from "@/lib/productsStore";
+import { readProducts, createProduct, updateProduct, deleteProduct } from "@/lib/productsStore";
+import type { Product } from "@/lib/productsStore";
 
-// GET /api/products  -> tüm liste
+// GET: liste
 export async function GET() {
-  const list = await readProducts();
-  return NextResponse.json(list);
+  try {
+    const rows = await readProducts();
+    return NextResponse.json(rows, { status: 200 });
+  } catch {
+    return NextResponse.json([], { status: 200 });
+  }
 }
 
-// POST /api/products  {action, payload}
-// action: "create" | "update" | "delete"
+// POST: { action, payload }
 export async function POST(req: Request) {
-  const { action, payload } = await req.json();
+  try {
+    const body = await req.json();
+    const action = body?.action as "create" | "update" | "delete";
+    const payload = body?.payload;
 
-  let list = await readProducts();
-
-  if (action === "create") {
-    const p: Omit<Product, "id"> = payload;
-    const id = Math.max(0, ...list.map((x) => x.id)) + 1;
-    const item: Product = { id, ...p, price: Number(p.price ?? 0) };
-    list.push(item);
-    await writeProducts(list);
-    return NextResponse.json(item);
+    if (action === "create") {
+      const p = payload as Omit<Product, "id">;
+      const created = await createProduct(p);
+      return NextResponse.json({ ok: true, data: created });
+    }
+    if (action === "update") {
+      const p = payload as Product;
+      await updateProduct(p);
+      return NextResponse.json({ ok: true });
+    }
+    if (action === "delete") {
+      await deleteProduct(Number(payload?.id));
+      return NextResponse.json({ ok: true });
+    }
+    return NextResponse.json({ ok: false, error: "INVALID_ACTION" }, { status: 400 });
+  } catch (e) {
+    return NextResponse.json({ ok: false, error: "SERVER_ERROR" }, { status: 500 });
   }
-
-  if (action === "update") {
-    const p: Product = payload;
-    list = list.map((x) => (x.id === p.id ? { ...x, ...p, price: Number(p.price ?? 0) } : x));
-    await writeProducts(list);
-    return NextResponse.json({ ok: true });
-  }
-
-  if (action === "delete") {
-    const id: number = payload?.id;
-    list = list.filter((x) => x.id !== id);
-    await writeProducts(list);
-    return NextResponse.json({ ok: true });
-  }
-
-  return NextResponse.json({ error: "Unknown action" }, { status: 400 });
 }
