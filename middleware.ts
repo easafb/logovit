@@ -10,7 +10,7 @@ export function middleware(request: NextRequest) {
   const authed = request.cookies.get("logovit_admin")?.value === "1";
 
   if (isAdminPage && !authed) {
-    url.pathname = "/"; // giriş yoksa anasayfaya at
+    url.pathname = "/login"; // giriş yoksa anasayfaya at
     return NextResponse.redirect(url);
   }
 
