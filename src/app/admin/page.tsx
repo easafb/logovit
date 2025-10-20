@@ -429,6 +429,11 @@ export default function AdminPage() {
     </main>
   );
 }
+async function logout() {
+  await fetch("/api/auth/logout", { method: "POST" });
+  window.location.href = "/";
+}
+
 
 /* Basit CSV satır ayrıştırıcı (tırnak/virgül destekli) */
 function parseCsvLine(line: string): string[] {
